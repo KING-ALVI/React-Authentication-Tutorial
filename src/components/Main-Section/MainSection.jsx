@@ -4,13 +4,13 @@ import { useState } from "react";
 
 const Main = () => {
 
-  // How to use Firebase Authentication system to sign in .
+  // How to use Firebase Authentication system for Google sign in .
   const GoggleAuthentication = new GoogleAuthProvider();
 
   // How to show the user infomation using Firebase Authentication system .
   const [UserInfo, setUserInfo] = useState(null);
 
-  // How to use Firebase Authentication system to sign in .
+  // How to use Firebase Authentication system for Google sign in .
   const handelGoogleSignInAuthentication = () => {
     signInWithPopup(auth, GoggleAuthentication)
       .then(result => {
@@ -42,7 +42,7 @@ const Main = () => {
       {
         UserInfo ?
           <>
-            {/* How to use Firebase Authentication system to sign out . */}
+            {/* How to use Firebase Authentication system for Google sign in . */}
             <button onClick={handelGoogleSignOutAuthentication} className="btn btn-primary">Sign Out From Google</button>
           </>
           :
