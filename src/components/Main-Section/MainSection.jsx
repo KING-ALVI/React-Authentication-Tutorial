@@ -1,8 +1,19 @@
 import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, signOut } from "firebase/auth";
 import { auth } from "../Firebase-Authentication/FirebaseAuthentication";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useState } from "react";
 
 const Main = () => {
+
+  //How to add show password and hide password in Firebase Authentiocation system .
+  const [ShowPassword, setShowPassword] = useState(false);
+
+  // how to make a cheack box Requered in Authentiocation System .
+  const [CheckBoxRequeredMassage, setCheckBoxRequeredMassage] = useState('');
+
+
+
+
 
   // How to declare Firebase Authentication system for Google sign in or log in .
   const GoggleAuthentication = new GoogleAuthProvider();
@@ -51,8 +62,8 @@ const Main = () => {
   // How to show Email exist massage .
   const [EmailSigninExistsMassage, setEmailSigninExistsMassage] = useState('');
 
-  // How to show Password confirmation massage .
-  const [PasswordConfirmationMassage, setPasswordConfirmationMassage] = useState('');
+  // How to show Password conditional massage .
+  const [PasswordConditionalMassage, setPasswordConditionalMassage] = useState('');
 
 
   // How to use Firebase Authentication system for Email sign in .
@@ -67,15 +78,28 @@ const Main = () => {
     // Get the Password value from the password input field .
     const Password = e.target.Password.value;
 
+    // how to make a cheack box requir in Authentiocation System .
+    const CheckBox = e.target.CheckBox.checked;
+    console.log(CheckBox);
+    // setCheckBoxRequerMassage(!CheckBox);
+    if (!CheckBox) {
+      setCheckBoxRequeredMassage("Please Accept Our Terms & Condition");
+      return
+    }
+    else {
+      // Clear the existing State when the form button is clicked .
+      setCheckBoxRequeredMassage('');
+    }
+
     // Clear the existing State when the form button is clicked .
     setEmailSigninSuccessMassage('');
     setEmailSigninExistsMassage('');
-    setPasswordConfirmationMassage('');
+    setPasswordConditionalMassage('');
 
     // Conditional check of password requirements .
     const PasswordRegExp = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}/;
     if (PasswordRegExp.test(Password) === false) {
-      setPasswordConfirmationMassage(
+      setPasswordConditionalMassage(
         "Password must be at least 8 characters long and include uppercase, lowercase, and a number."
       );
     }
@@ -87,18 +111,18 @@ const Main = () => {
         setEmailUserInfo(UserData);
 
         // How to show Sign in success massage .
-        setEmailSigninSuccessMassage(UserData);
+        setEmailSigninSuccessMassage('Sign in successfull !!');
 
         console.log('Sign in data : ', UserData);
       })
       .catch(Error => {
-        console.log(Error);
+        console.log(Error.message);
 
         // How to show Firebase error message .
-        setEmailSigninExistsMassage(Error.message);
+        setEmailSigninExistsMassage('This email already exists !!');
       })
 
-    console.log('Sign in Email : ', Email, 'Sign in Password : ', Password)
+    console.log('Sign in Email : ', Email, 'Sign in Password : ', Password);
   }
 
 
@@ -124,10 +148,10 @@ const Main = () => {
         console.log('Log in data : ', UserData);
       })
       .catch(Error => {
-        console.log(Error)
+        console.log(Error);
       })
 
-    console.log('Log in Email : ', Email, 'Log in Password : ', Password)
+    console.log('Log in Email : ', Email, 'Log in Password : ', Password);
   }
 
 
@@ -169,9 +193,22 @@ const Main = () => {
               <form className="fieldset" onSubmit={handelEmailSignInAuthentication}>
                 <label className="label">Email</label>
                 <input type="email" className="input" placeholder="Email" name="Email" />
+
+                {/* How to add show password and hide password in Firebase Authentiocation system . */}
                 <label className="label">Password</label>
-                <input type="password" className="input" placeholder="Password" name="Password" />
+                <div className="flex">
+                  <input type={ShowPassword ? 'text' : 'password'} className="input" placeholder="Password" name="Password" />
+                  <div onClick={() => setShowPassword(!ShowPassword)} className="btn btn-ghost">{ShowPassword ? <FaEyeSlash /> : <FaEye />}</div>
+                </div>
+
                 <div><a className="link link-hover">Forgot password?</a></div>
+
+                {/* how to make a cheack box requir in Authentiocation System . */}
+                <label className="label">
+                  <input type="checkbox" name="CheckBox" className="checkbox" />
+                  Accept Terms & Conditions
+                </label>
+
                 <button className="btn btn-neutral mt-4">Sign in</button>
               </form>
             </div>
@@ -179,11 +216,13 @@ const Main = () => {
 
           {/* Show sign‑in message on conditional basis . */}
           {
-          /* if */  EmailSigninSuccessMassage ? <h1 className="text-2xl text-green-700">Sign in successfull !!</h1>
+           /* if */ CheckBoxRequeredMassage ? <p className="text-red-500">{CheckBoxRequeredMassage}</p>
 
-      /* else if */ : PasswordConfirmationMassage ? <p className="text-red-500">{PasswordConfirmationMassage}</p>
+      /* else if */ : PasswordConditionalMassage ? <p className="text-red-500">{PasswordConditionalMassage}</p>
 
-         /* else */ : EmailSigninExistsMassage && <h1 className="text-2xl text-red-500">This email already exists !!</h1>
+      /* else if */ : EmailSigninSuccessMassage ? <h1 className="text-2xl text-green-700">{EmailSigninSuccessMassage}</h1>
+
+         /* else */ : EmailSigninExistsMassage && <h1 className="text-2xl text-red-500">{EmailSigninExistsMassage}</h1>
 
           }
 
@@ -203,8 +242,14 @@ const Main = () => {
               <form className="fieldset" onSubmit={handelEmailLogInAuthentication}>
                 <label className="label">Email</label>
                 <input type="email" className="input" placeholder="Email" name="Email" />
+
+                {/* How to add show password and hide password in Firebase Authentiocation system . */}
                 <label className="label">Password</label>
-                <input type="password" className="input" placeholder="Password" name="Password" />
+                <div className="flex">
+                  <input type={ShowPassword ? 'text' : 'password'} className="input" placeholder="Password" name="Password" />
+                  <div className="btn btn-ghost" onClick={() => setShowPassword(!ShowPassword)}>{ShowPassword ? <FaEyeSlash /> : <FaEye />}</div>
+                </div>
+
                 <div><a className="link link-hover">Forgot password?</a></div>
                 <button className="btn btn-neutral mt-4">Log in</button>
               </form>
