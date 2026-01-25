@@ -1,15 +1,12 @@
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, signOut } from "firebase/auth";
+import { createUserWithEmailAndPassword, GoogleAuthProvider, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword, signInWithPopup, signOut } from "firebase/auth";
 import { auth } from "../Firebase-Authentication/FirebaseAuthentication";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 const Main = () => {
 
   //How to add show password and hide password in Firebase Authentiocation system .
   const [ShowPassword, setShowPassword] = useState(false);
-
-  // how to make a cheack box Requered in Authentiocation System .
-  const [CheckBoxRequeredMassage, setCheckBoxRequeredMassage] = useState('');
 
 
 
@@ -54,7 +51,8 @@ const Main = () => {
 
 
 
-  const [EmailUserInfo, setEmailUserInfo] = useState([]);
+  // How to show the user infomation using Firebase Authentication system .
+  const [EmailSigninUserInfo, setEmailSigninUserInfo] = useState([]);
 
   // How to show Sign in success massage .
   const [EmailSigninSuccessMassage, setEmailSigninSuccessMassage] = useState('');
@@ -63,8 +61,10 @@ const Main = () => {
   const [EmailSigninExistsMassage, setEmailSigninExistsMassage] = useState('');
 
   // How to show Password conditional massage .
-  const [PasswordConditionalMassage, setPasswordConditionalMassage] = useState('');
+  const [PasswordRequirementsMassage, setPasswordRequirementsMassage] = useState('');
 
+  // how to make a cheack box Requered in Authentiocation System .
+  const [CheckBoxRequeredMassage, setCheckBoxRequeredMassage] = useState('');
 
   // How to use Firebase Authentication system for Email sign in .
   const handelEmailSignInAuthentication = e => {
@@ -84,7 +84,7 @@ const Main = () => {
     // setCheckBoxRequerMassage(!CheckBox);
     if (!CheckBox) {
       setCheckBoxRequeredMassage("Please Accept Our Terms & Condition");
-      return
+      return;
     }
     else {
       // Clear the existing State when the form button is clicked .
@@ -94,12 +94,12 @@ const Main = () => {
     // Clear the existing State when the form button is clicked .
     setEmailSigninSuccessMassage('');
     setEmailSigninExistsMassage('');
-    setPasswordConditionalMassage('');
+    setPasswordRequirementsMassage('');
 
-    // Conditional check of password requirements .
+    // Conditional check of Password requirements .
     const PasswordRegExp = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}/;
     if (PasswordRegExp.test(Password) === false) {
-      setPasswordConditionalMassage(
+      setPasswordRequirementsMassage(
         "Password must be at least 8 characters long and include uppercase, lowercase, and a number."
       );
     }
@@ -108,10 +108,17 @@ const Main = () => {
     createUserWithEmailAndPassword(auth, Email, Password)
       .then(Result => {
         const UserData = Result.user;
-        setEmailUserInfo(UserData);
+        setEmailSigninUserInfo(UserData);
 
-        // How to show Sign in success massage .
-        setEmailSigninSuccessMassage('Sign in successfull !!');
+        // how to add an Email Verification functionality using Firebase Authentication . 
+        sendEmailVerification(Result.user)
+          .then(() => {
+            // How to show Sign in success massage .
+            setEmailSigninSuccessMassage('Sign in successfull !! We have Send you an Email Verification link , Pleasy varify your Eamil !!');
+          })
+          .catch(() => {
+            // send a Error massage .
+          })
 
         console.log('Sign in data : ', UserData);
       })
@@ -129,6 +136,15 @@ const Main = () => {
 
 
 
+  // How to show the user infomation using Firebase Authentication system .
+  const [EmailLoginUserInfo, setEmailLoginUserInfo] = useState([]);
+
+  // how to send an Error massage in log in .
+  const [CheackError, setCheackError] = useState('');
+
+  // how to send an Success massage in log in .
+  const [CheackSuccess, setCheackSuccess] = useState('');
+
   // How to use Firebase Authentication system for Email log in .
   const handelEmailLogInAuthentication = e => {
 
@@ -141,19 +157,49 @@ const Main = () => {
     // Get the Password value from the password input field .
     const Password = e.target.Password.value;
 
+    // Clear the existing State when the form button is clicked .
+    setCheackError('');
+    setCheackSuccess('');
+
     // Firebase Email log in function .
     signInWithEmailAndPassword(auth, Email, Password)
       .then(Result => {
-        const UserData = Result.user
+        const UserData = Result.user;
+        setEmailLoginUserInfo(UserData);
         console.log('Log in data : ', UserData);
+
+        // how to cheack if the User was Varifyed .
+        if (!UserData.emailVerified) {
+          setCheackError('Please varify you Email !!');
+        }
+        else {
+          setCheackSuccess('You have successfuly Log in !!');
+        }
+
       })
       .catch(Error => {
-        console.log(Error);
+        console.log(Error.message);
+        setCheackError('Wrong Email or Password !!');
       })
 
     console.log('Log in Email : ', Email, 'Log in Password : ', Password);
   }
 
+  const getEmail = useRef();
+
+  const handelPasswordResetEmail = () => {
+    console.log(getEmail.current.value);
+    const Email = getEmail.current.value;
+
+    sendPasswordResetEmail(auth, Email)
+      .then(() => {
+        // how to a Password Reset Email massage .
+        setCheackSuccess('a Password Reset Email has send to your email . please cheack your email !!');
+      })
+      .catch(() => {
+        // send a Error massage .
+      })
+  }
 
   return (
     <>
@@ -201,8 +247,6 @@ const Main = () => {
                   <div onClick={() => setShowPassword(!ShowPassword)} className="btn btn-ghost">{ShowPassword ? <FaEyeSlash /> : <FaEye />}</div>
                 </div>
 
-                <div><a className="link link-hover">Forgot password?</a></div>
-
                 {/* how to make a cheack box requir in Authentiocation System . */}
                 <label className="label">
                   <input type="checkbox" name="CheckBox" className="checkbox" />
@@ -218,7 +262,7 @@ const Main = () => {
           {
            /* if */ CheckBoxRequeredMassage ? <p className="text-red-500">{CheckBoxRequeredMassage}</p>
 
-      /* else if */ : PasswordConditionalMassage ? <p className="text-red-500">{PasswordConditionalMassage}</p>
+      /* else if */ : PasswordRequirementsMassage ? <p className="text-red-500">{PasswordRequirementsMassage}</p>
 
       /* else if */ : EmailSigninSuccessMassage ? <h1 className="text-2xl text-green-700">{EmailSigninSuccessMassage}</h1>
 
@@ -227,7 +271,7 @@ const Main = () => {
           }
 
           {/* How to show the user infomation using Firebase Authentication system . */}
-          {EmailUserInfo.email}
+          {EmailSigninUserInfo.email}
         </div>
       </div>
 
@@ -241,7 +285,7 @@ const Main = () => {
             <div className="card-body">
               <form className="fieldset" onSubmit={handelEmailLogInAuthentication}>
                 <label className="label">Email</label>
-                <input type="email" className="input" placeholder="Email" name="Email" />
+                <input type="email" className="input" placeholder="Email" name="Email" ref={getEmail} />
 
                 {/* How to add show password and hide password in Firebase Authentiocation system . */}
                 <label className="label">Password</label>
@@ -250,11 +294,18 @@ const Main = () => {
                   <div className="btn btn-ghost" onClick={() => setShowPassword(!ShowPassword)}>{ShowPassword ? <FaEyeSlash /> : <FaEye />}</div>
                 </div>
 
-                <div><a className="link link-hover">Forgot password?</a></div>
+                <div><a onClick={handelPasswordResetEmail} className="link link-hover">Forgot password?</a></div>
                 <button className="btn btn-neutral mt-4">Log in</button>
               </form>
             </div>
           </div>
+
+          {/* how show Error or Success massage . */}
+          <h1 className="text-2xl text-red-500">{CheackError}</h1>
+          <h1 className="text-2xl text-green-700">{CheackSuccess}</h1>
+
+          {/* How to show the user infomation using Firebase Authentication system . */}
+          {EmailLoginUserInfo.email}
         </div>
       </div>
     </>
