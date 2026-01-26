@@ -1,4 +1,4 @@
-import { createUserWithEmailAndPassword, GoogleAuthProvider, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword, signInWithPopup, signOut } from "firebase/auth";
+import { createUserWithEmailAndPassword, GoogleAuthProvider, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword, signInWithPopup, signOut, updateProfile } from "firebase/auth";
 import { auth } from "../Firebase-Authentication/FirebaseAuthentication";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useRef, useState } from "react";
@@ -78,6 +78,12 @@ const Main = () => {
     // Get the Password value from the password input field .
     const Password = e.target.Password.value;
 
+    // Get the Name value form the password input field .
+    const Name = e.target.Name.value;
+
+    // Get the Photo value from the Photo URL input field .
+    const PhotoURL = e.target.Photo.value
+
     // how to make a cheack box requir in Authentiocation System .
     const CheckBox = e.target.CheckBox.checked;
     console.log(CheckBox);
@@ -111,7 +117,7 @@ const Main = () => {
         setEmailSigninUserInfo(UserData);
 
         // how to add an Email Verification functionality using Firebase Authentication . 
-        sendEmailVerification(Result.user)
+        sendEmailVerification(UserData)
           .then(() => {
             // How to show Sign in success massage .
             setEmailSigninSuccessMassage('Sign in successfull !! We have Send you an Email Verification link , Pleasy varify your Eamil !!');
@@ -120,8 +126,22 @@ const Main = () => {
             // send a Error massage .
           })
 
+        // how to add or update Profile using Firebase Authentication .
+        const Profile = {
+          displayName: Name,
+          photoURL: PhotoURL
+        }
+        updateProfile(UserData, Profile)
+          .then(() => {
+            // send a Success massage .
+          })
+          .catch(() => {
+            // send a Error massage .
+          })
+
         console.log('Sign in data : ', UserData);
       })
+
       .catch(Error => {
         console.log(Error.message);
 
@@ -237,6 +257,13 @@ const Main = () => {
           <div className="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
             <div className="card-body">
               <form className="fieldset" onSubmit={handelEmailSignInAuthentication}>
+
+                <label className="label">Your Name</label>
+                <input type="text" className="input" placeholder="Enter you Name" name="Name" />
+
+                <label className="label">Photo URL</label>
+                <input type="text" className="input" placeholder="Your Photo URL" name="Photo" />
+
                 <label className="label">Email</label>
                 <input type="email" className="input" placeholder="Email" name="Email" />
 
@@ -271,7 +298,10 @@ const Main = () => {
           }
 
           {/* How to show the user infomation using Firebase Authentication system . */}
-          {EmailSigninUserInfo.email}
+          <img src={EmailSigninUserInfo.photoURL} alt="User Photo" />
+          <h3 className="text-3xl">Name : {EmailSigninUserInfo.displayName}</h3>
+          <p>Email : {EmailSigninUserInfo.email}</p>
+
         </div>
       </div>
 
@@ -285,7 +315,7 @@ const Main = () => {
             <div className="card-body">
               <form className="fieldset" onSubmit={handelEmailLogInAuthentication}>
                 <label className="label">Email</label>
-                <input type="email" className="input" placeholder="Email" name="Email" ref={getEmail} />
+                <input type="email" className="input" placeholder="Email" name="Email" /* Get the Email For Reset Password */ ref={getEmail} />
 
                 {/* How to add show password and hide password in Firebase Authentiocation system . */}
                 <label className="label">Password</label>
@@ -305,7 +335,9 @@ const Main = () => {
           <h1 className="text-2xl text-green-700">{CheackSuccess}</h1>
 
           {/* How to show the user infomation using Firebase Authentication system . */}
-          {EmailLoginUserInfo.email}
+          <img src={EmailLoginUserInfo.photoURL} alt="User Photo" />
+          <h3 className="text-3xl">Name : {EmailLoginUserInfo.displayName}</h3>
+          <p>Email : {EmailLoginUserInfo.email}</p>
         </div>
       </div>
     </>
