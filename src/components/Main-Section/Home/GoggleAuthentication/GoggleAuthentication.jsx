@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { auth } from "../../../Firebase-Authentication/FirebaseAuthentication";
 import { GoogleAuthProvider, signInWithPopup, signOut, } from "firebase/auth";
