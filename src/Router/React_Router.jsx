@@ -5,7 +5,7 @@ import Home from "../components/Main-Section/Home/Home";
 import EmailSignIn from "../components/Main-Section/Home/EmailSignIn/EmailSignIn";
 import EmailLogIn from "../components/Main-Section/Home/EmailLogIn/EmailLogIn";
 
-const React_Router = () => {
+const React_Router = () => { 
 
     const router = createBrowserRouter([
         {
