@@ -11,7 +11,7 @@ const ErrorHandel = () => {
 
             <h1 className="text-5xl text-center">SORRY PAGE NOT FOUND !!</h1>
 
-            <br />
+            <br /> 
 
             <p className="text-3xl text-center"><b><i>{Error.statusText || Error.message}</i></b></p>
 
